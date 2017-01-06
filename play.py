@@ -3,23 +3,34 @@ import RPi.GPIO as GPIO
 import random
 import os
 import subprocess
+import alsaaudio
+import struct
 import scipy.io.wavfile as wavfile
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 """
-mixer = pygame.mixer
-music = mixer.music
+device = alsaaudio.PCM(device='default')
+device.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+device.setchannels(2)
+device.setrate(44100)
+device.setperiodsize(320)
+
+greeting_path = '/home/pi/jokes/music/greeting/' + str(random.randint(1, 6)) + '.wav'
+rate, greeting_music= wavfile.read(greeting_path)
+print(greeting_music)
+
+start = 320
+while start + 320 <= len(greeting_music):
+    device.write(greeting_music[start:start+320, :])
+    start = start + 320
 """
 
 while True:
     input_state = GPIO.input(2)
     if input_state == True: continue
     time.sleep(0.5)
-    greeting_path = '/home/pi/jokes/music/greeting/' + str(random.randint(1, 6)) + '.wav'
-    rate, greeting_music = wavfile.read(greeting_path)
-    print(rate)
-    print(path1)
+    path1 = '/home/pi/jokes/music/greeting/' + str(random.randint(1, 6)) + '.wav'
     p = subprocess.Popen(['aplay', '-D', 'plughw:1,0'] + [path1])
     p.wait()
     while True:
